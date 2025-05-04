@@ -15,11 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique()->nullable();
-            $table->text('body')->nullable();
-            $table->boolean('is_published');
-            $table->date('published_date');
-            $table->text('meta_description');
-            $table->string('tags');
+            $table->text('body');
+            $table->boolean('is_published')->default(false);
+            $table->date('published_date')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->json('tags')->nullable();
+            $table->json('keywords')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
