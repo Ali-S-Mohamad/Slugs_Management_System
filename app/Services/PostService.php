@@ -24,6 +24,16 @@ class PostService
     }
 
     /**
+     * Paginate only the soft-deleted posts.
+     * @param int $perPage
+     * @return LengthAwarePaginator
+     */
+    public function listTrashed(int $perPage = 5): LengthAwarePaginator
+    {
+        return Post::onlyTrashed()->paginate($perPage);
+    }
+
+    /**
      * Create a new post
      * @param array $data
      * @return Post
@@ -68,6 +78,17 @@ class PostService
             return $post;
         }
         return null;
+    }
+
+    /**
+     * Restore *all* soft-deleted posts.
+     *
+     * @return int  The number of posts restored.
+     */
+    public function restoreAll(): int
+    {
+        // returns number of records restored
+        return Post::onlyTrashed()->restore();
     }
 
     /**

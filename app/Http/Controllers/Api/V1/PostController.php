@@ -131,4 +131,47 @@ class PostController extends Controller
             200
         );
     }
+
+    /**
+     * GET /posts/trashed
+     * List all soft-deleted posts.
+     * @return JsonResponse
+     */
+    public function trashed(): JsonResponse
+    {
+        $trashed = $this->service->listTrashed();
+        if(count($trashed)> 0){
+            return $this->success($trashed, 'Trashed posts retrieved.', 200);
+        }
+        return $this->error(
+            'No trashed posts.',
+            [],
+            404
+        );
+    }
+
+    /**
+     * POST /posts/restore-all
+     * Restore *all* soft-deleted posts.
+     * @return JsonResponse
+     */
+    public function restoreAll(): JsonResponse
+    {
+        $count = $this->service->restoreAll();
+
+        if ($count > 0) {
+            return $this->success(
+                ['restored_count' => $count],
+                'All trashed posts have been restored.',
+                200
+            );
+        }
+
+        return $this->error(
+            'No trashed posts to restore.',
+            [],
+            404
+        );
+    }
 }
+
