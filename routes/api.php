@@ -10,4 +10,8 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     Route::apiResource('posts', PostController::class);
+    Route::post('posts/{id}/restore', [PostController::class, 'restore']);
+    Route::delete('posts/{id}/force', [PostController::class, 'forceDelete']);
 });
+
+

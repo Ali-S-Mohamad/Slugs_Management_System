@@ -1,61 +1,133 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Thought for a couple of seconds
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
+## Blog API (Laravel 12)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+A RESTful API for managing blog posts, built with Laravel 12. Supports full CRUD with Form Requests and advanced validation, plus soft-deletes, restoring, and permanent deletes.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 📋 Features
 
-## Learning Laravel
+* **Posts CRUD** (Create, Read, Update, Delete)
+* **Soft Deletes** (with restore)
+* **Force Delete** (permanent removal)
+* **API Versioning** (`/api/v1/...`)
+* **Form Requests** with:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+  * `StorePostRequest` & `UpdatePostRequest`
+  * Automatic slug generation
+  * Advanced tags & keywords parsing
+  * Custom validation rules (`SlugFormat`, `FutureDate`)
+  * Custom JSON error responses
+* **Service Layer** (Business logic extracted to `PostService`)
+* **Consistent JSON responses** via `BaseApiController` helpers
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🚀 Requirements
 
-## Laravel Sponsors
+* PHP ≥ 8.1
+* Composer
+* MySQL (or other supported DB)
+* Laravel 12
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+### 🔧 Installation
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+1. **Clone repository**
 
-## Contributing
+   ```bash
+   git clone https://github.com/Ali-S-Mohamad/Slugs_Management_System.git
+   cd Slugs_Management_System
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Install dependencies**
 
-## Code of Conduct
+   ```bash
+   composer install
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3. **Environment setup**
 
-## Security Vulnerabilities
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+   Configure your `.env` for DB, Redis, etc.
 
-## License
+4. **Run migrations**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+   ```bash
+   php artisan migrate
+   ```
+
+5. **Serve locally**
+
+   ```bash
+   php artisan serve
+   ```
+
+   The API will be available at `http://127.0.0.1:8000/api/v1`.
+
+---
+
+### 🔗 API Endpoints
+
+All endpoints are prefixed with `/api/v1`.
+
+| Method | URI                   | Description                  |
+| ------ | --------------------- | ---------------------------- |
+| GET    | `/posts`              | List posts (with pagination) |
+| GET    | `/posts/{id}`         | Retrieve single post         |
+| POST   | `/posts`              | Create a new post            |
+| PATCH  | `/posts/{id}`         | Update an existing post      |
+| DELETE | `/posts/{id}`         | Soft-delete a post           |
+| POST   | `/posts/{id}/restore` | Restore a soft-deleted post  |
+| DELETE | `/posts/{id}/force`   | Permanently delete a post    |
+
+#### Query Parameters for `GET /posts`
+
+* `published_only` (boolean) — show only published posts
+* `with_trashed` (boolean) — include soft-deleted posts
+
+---
+
+### 🔍 Validation Highlights
+
+* **title**: required (create), sometimes (update), string, max:255
+* **slug**: required/sometimes, unique, custom `SlugFormat` rule
+* **body**: required/sometimes, string
+* **is\_published**: boolean
+* **publish\_date**: nullable, date, custom `FutureDate` rule
+* **meta\_description**: nullable, string, max:160
+* **tags**: nullable, array of strings (max 50 chars each)
+* **keywords**: nullable, array of strings (max 10 items)
+
+All validation logic lives in the Form Requests under `app/Http/Requests/`.
+
+---
+
+### 🛠️ Architecture
+
+* **Controllers** (`app/Http/Controllers/Api/V1/PostController.php`)
+
+  * Handle HTTP, call `PostService`, return JSON via `Controller::success()` / `error()`.
+* **Service Layer** (`app/Services/PostService.php`)
+
+  * Contains data-access and business logic: listing with filters, create, update, soft/delete, restore, forceDelete.
+* **Form Requests** (`StorePostRequest`, `UpdatePostRequest`)
+
+  * Prepare input (slug, tags, keywords), enforce rules, customize messages, return JSON errors.
+* **Custom Rules** (`app/Rules/SlugFormat.php`, `FutureDate.php`)
+
+  * Enforce lowercase-hyphen slugs and future publish dates.
+
+---
+
+### 🔗 Postman Collection
+
+You can import the API endpoints into Postman using this collection:  
+[Open Postman Collection](https://documenter.getpostman.com/view/24693079/2sB2j6AAfW)

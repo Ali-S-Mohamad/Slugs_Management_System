@@ -28,11 +28,39 @@ class StorePostRequest extends FormRequest
                 'slug' => Str::slug($this->input('title'))
             ]);
         }
-        $tags = collect(explode(',', $this->input('tags', '')))
-            ->filter()->map('trim')->values();
-        $keywords = collect(explode(' ', $this->input('meta_description', '')))
-            ->filter()->map('trim')->take(10)->values();
-        $this->merge(compact('tags', 'keywords'));
+
+        $rawTags = $this->input('tags', '');
+
+        $tags = is_string($rawTags)
+            ? collect(explode(',', $rawTags))
+            : collect($rawTags);
+
+        $tags = $tags->filter()->map('trim')->values();
+        $tagsArray = $tags->toArray();
+
+
+        $rawKeywords = $this->input('keywords', null);
+
+        if (is_string($rawKeywords)) {
+            $keywordsSource = explode(' ', $rawKeywords);
+        } elseif (is_array($rawKeywords)) {
+            $keywordsSource = $rawKeywords;
+        } else {
+            $keywordsSource = explode(' ', $this->input('meta_description', ''));
+        }
+
+        $keywords = collect($keywordsSource)
+            ->filter()
+            ->map('trim')
+            ->slice(0, 10)
+            ->values();
+
+        $keywordsArray = $keywords->toArray();
+
+        $this->merge([
+            'tags'     => $tagsArray,
+            'keywords' => $keywordsArray,
+        ]);
     }
 
     /**
@@ -59,7 +87,7 @@ class StorePostRequest extends FormRequest
 
 
     /**
-     * Summary of attributes
+     * Human-friendly attribute names for error messages.
      * @return array{body: string, is_published: string, keywords: string, meta_description: string, publish_date: string, slug: string, tags: string, title: string}
      */
     public function attributes(){
@@ -77,7 +105,7 @@ class StorePostRequest extends FormRequest
 
 
     /**
-     * Summary of messages
+     * Custom validation messages.
      * @return array{body.required: string, is_published.boolean: string, keywords.string: string, meta_description.max: string, publish_date.date: string, publish_date.required_if: string, slug.max: string, slug.unique: string, title.max: string, title.required: string}
      */
     public function messages(){
@@ -97,7 +125,7 @@ class StorePostRequest extends FormRequest
 
 
     /**
-     * Summary of failedValidation
+     * Handle validation failure with custom JSON response.
      * @param \Illuminate\Contracts\Validation\Validator $validator
      * @throws \Illuminate\Validation\ValidationException
      * @return never
@@ -113,7 +141,7 @@ class StorePostRequest extends FormRequest
     }
 
     /**
-     * Summary of passedValidation
+     * Process clean-up after validation passes.
      * @return void
      */
     protected function passedValidation()

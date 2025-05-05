@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique()->nullable();
             $table->text('body');
             $table->boolean('is_published')->default(false);
-            $table->date('published_date')->nullable();
+            $table->dateTime('published_date')->nullable();
             $table->text('meta_description')->nullable();
             $table->json('tags')->nullable();
             $table->json('keywords')->nullable();
